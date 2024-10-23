@@ -1,27 +1,33 @@
-async function buscaEndereco(cep) {
-    var mensagemErro = document.getElementById('erro');
+async function buscarEndereco(cep) {
+    const mensagemErro = document.getElementById('erro');
     mensagemErro.innerHTML = "";
+    if (cep.length != 8) {
+        mensagemErro.innerHTML = `<p>CEP deve ter 8 dígitos.</p>`;
+        return;
+    }
     try {
-        var consultaCEP = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
-        var consultaCEPConvertida = await consultaCEP.json();
+        const consultaCEP = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+        const consultaCEPConvertida = await consultaCEP.json();
         if (consultaCEPConvertida.erro) {
             throw Error('CEP não existente!');
         }
-        var cidade = document.getElementById('cidade');
-        var logradouro = document.getElementById('endereco');
-        var estado = document.getElementById('estado');
-
-        cidade.value = consultaCEPConvertida.localidade;
-        logradouro.value = consultaCEPConvertida.logradouro;
-        estado.value = consultaCEPConvertida.uf;
-
-        console.log(consultaCEPConvertida);
-        return consultaCEPConvertida;
+        preencherCamposEndereco(consultaCEPConvertida);
     } catch (erro) {
-        mensagemErro.innerHTML = `<p>CEP inválido. Tente novamente!</p>`
-        console.log(erro);
+        mensagemErro.innerHTML = `<p>CEP inválido. Tente novamente!</p>`;
     }
 }
 
-var cep = document.getElementById('cep');
-cep.addEventListener("focusout", () => buscaEndereco(cep.value));
+function preencherCamposEndereco(endereco) {
+    const estado = document.getElementById('estado');
+    const cidade = document.getElementById('cidade');
+    const bairro = document.getElementById('bairro');
+    const logradouro = document.getElementById('endereco');
+
+    estado.value = endereco.uf;
+    cidade.value = endereco.localidade;
+    bairro.value = endereco.bairro;
+    logradouro.value = endereco.logradouro;
+}
+
+const cepInput = document.getElementById('cep');
+cepInput.addEventListener("focusout", () => buscarEndereco(cepInput.value));
